@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bioarchaeology Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.4.4/math.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .calculator {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .measurement-pair {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .measurement-pair label {
+            flex: 1;
+        }
+        input {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f8f8;
+            border-radius: 4px;
+        }
+        .demographic-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border-left: 4px solid #4CAF50;
+            background: white;
+        }
+        .note {
+            font-style: italic;
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>Bioarchaeology Calculator</h1>
+
+        <div class="section">
+            <h2>Long Bone Measurements (cm)</h2>
+            
+            <div class="measurement-pair">
+                <label>Max. Femur Length (XLF):</label>
+                <input type="number" step="0.1" id="xlf_left" placeholder="Left">
+                <input type="number" step="0.1" id="xlf_right" placeholder="Right">
+            </div>
+
+            <div class="measurement-pair">
+                <label>Physiological Tibia Length (LCT):</label>
+                <input type="number" step="0.1" id="lct_left" placeholder="Left">
+                <input type="number" step="0.1" id="lct_right" placeholder="Right">
+            </div>
+
+            <div class="measurement-pair">
+                <label>Max. Fibula Length (XLG):</label>
+                <input type="number" step="0.1" id="xlg_left" placeholder="Left">
+                <input type="number" step="0.1" id="xlg_right" placeholder="Right">
+            </div>
+
+            <div class="measurement-pair">
+                <label>Max. Humerus Length (XLH):</label>
+                <input type="number" step="0.1" id="xlh_left" placeholder="Left">
+                <input type="number" step="0.1" id="xlh_right" placeholder="Right">
+            </div>
+
+            <div class="measurement-pair">
+                <label>Max. Radius Length (XLR):</label>
+                <input type="number" step="0.1" id="xlr_left" placeholder="Left">
+                <input type="number" step="0.1" id="xlr_right" placeholder="Right">
+            </div>
+
+            <div class="measurement-pair">
+                <label>Max. Ulna Length (XLU):</label>
+                <input type="number" step="0.1" id="xlu_left" placeholder="Left">
+                <input type="number" step="0.1" id="xlu_right" placeholder="Right">
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Body Size Measurements (mm)</h2>
+            
+            <div class="measurement-pair">
+                <label>Femoral Head (MLSIHF):</label>
+                <input type="number" step="0.1" id="mlsihf_left" placeholder="Left">
+                <input type="number" step="0.1" id="mlsihf_right" placeholder="Right">
+            </div>
+
+            <div class="measurement-pair">
+                <label>Sub-trochanteric AP (APsubTF):</label>
+                <input type="number" step="0.1" id="apsubtf_left" placeholder="Left">
+                <input type="number" step="0.1" id="apsubtf_right" placeholder="Right">
+            </div>
+
+            <div class="measurement-pair">
+                <label>Sub-trochanteric ML (MLsubTF):</label>
+                <input type="number" step="0.1" id="mlsubtf_left" placeholder="Left">
+                <input type="number" step="0.1" id="mlsubtf_right" placeholder="Right">
+            </div>
+        </div>
+
+        <button onclick="calculate()">Calculate</button>
+
+        <div class="results" id="results">
+            <h2>Results</h2>
+            <div id="stature_results"></div>
+            <div id="body_mass_results"></div>
+        </div>
+    </div>
+
+    <script>
+        function getMean(left, right) {
+            if (left && right) return (parseFloat(left) + parseFloat(right)) / 2;
+            return parseFloat(left || right || 0);
+        }
+
+        function calculate() {
+            // Get means of measurements
+            const measurements = {
+                XLF: getMean(document.getElementById('xlf_left').value, document.getElementById('xlf_right').value),
+                LCT: getMean(document.getElementById('lct_left').value, document.getElementById('lct_right').value),
+                XLG: getMean(document.getElementById('xlg_left').value, document.getElementById('xlg_right').value),
+                XLH: getMean(document.getElementById('xlh_left').value, document.getElementById('xlh_right').value),
+                XLR: getMean(document.getElementById('xlr_left').value, document.getElementById('xlr_right').value),
+                XLU: getMean(document.getElementById('xlu_left').value, document.getElementById('xlu_right').value),
+                MLSIHF: getMean(document.getElementById('mlsihf_left').value, document.getElementById('mlsihf_right').value),
+                APsubTF: getMean(document.getElementById('apsubtf_left').value, document.getElementById('apsubtf_right').value),
+                MLsubTF: getMean(document.getElementById('mlsubtf_left').value, document.getElementById('mlsubtf_right').value)
+            };
+
+            let statureHTML = '<h3>Stature Estimates</h3>';
+            let hasAnyResults = false;
+
+            // Function to add demographic section
+            function addDemographicResults(title, results) {
+                if (results.length === 0) return '';
+                hasAnyResults = true;
+                let html = `<div class="demographic-section">
+                    <h4>${title}</h4>
+                    <p>Listed in order of increasing standard error:</p>`;
+                results.sort((a, b) => a.error - b.error);
+                results.forEach(result => {
+                    html += `<p>Formula ${result.formula}: ${result.value.toFixed(1)} cm ± ${result.error} cm</p>`;
+                });
+                return html + '</div>';
+            }
+
+            // Calculate for each demographic group
+            let maleWhiteResults = [];
+            let maleBlackResults = [];
+            let femaleWhiteResults = [];
+            let femaleBlackResults = [];
+
+            // Male White calculations
+            if (measurements.XLF && measurements.LCT) 
+                maleWhiteResults.push({formula: 'A', value: 1.30 * (measurements.XLF + measurements.LCT) + 63.29, error: 2.99});
+            if (measurements.XLF) 
+                maleWhiteResults.push({formula: 'B', value: 2.38 * measurements.XLF + 61.41, error: 3.27});
+            if (measurements.XLG)
+                maleWhiteResults.push({formula: 'C', value: 2.68 * measurements.XLG + 71.78, error: 3.29});
+            if (measurements.LCT)
+                maleWhiteResults.push({formula: 'D', value: 2.52 * measurements.LCT + 78.62, error: 3.37});
+            if (measurements.XLF && measurements.XLG)
+                maleWhiteResults.push({formula: 'E', value: 1.31 * (measurements.XLF + measurements.XLG) + 63.05, error: 3.62});
+
+            // Male Black calculations
+            if (measurements.XLF && measurements.LCT)
+                maleBlackResults.push({formula: 'K', value: 1.15 * (measurements.XLF + measurements.LCT) + 71.04, error: 3.53});
+            if (measurements.XLF && measurements.XLG)
+                maleBlackResults.push({formula: 'L', value: 1.20 * (measurements.XLF + measurements.XLG) + 67.77, error: 3.63});
+
+            // Female White calculations
+            if (measurements.XLH && measurements.XLF && measurements.LCT)
+                femaleWhiteResults.push({formula: 'A', value: 0.68 * measurements.XLH + 1.17 * measurements.XLF + 1.15 * measurements.LCT + 50.12, error: 3.51});
+            if (measurements.XLF && measurements.LCT)
+                femaleWhiteResults.push({formula: 'B', value: 1.48 * measurements.XLF + 1.28 * measurements.LCT + 53.07, error: 3.55});
+
+            // Female Black calculations
+            if (measurements.XLH && measurements.XLR && measurements.XLF && measurements.LCT)
+                femaleBlackResults.push({formula: 'K', value: 0.44 * measurements.XLH - 0.20 * measurements.XLR + 1.46 * measurements.XLF + 0.86 * measurements.LCT + 56.33, error: 3.22});
+            if (measurements.XLF && measurements.LCT)
+                femaleBlackResults.push({formula: 'L', value: 1.53 * measurements.XLF + 0.96 * measurements.LCT + 58.54, error: 3.23});
+
+            // Add all results to HTML
+            statureHTML += addDemographicResults('Male - American White', maleWhiteResults);
+            statureHTML += addDemographicResults('Male - American Black', maleBlackResults);
+            statureHTML += addDemographicResults('Female - American White', femaleWhiteResults);
+            statureHTML += addDemographicResults('Female - American Black', femaleBlackResults);
+
+            if (!hasAnyResults) {
+                statureHTML += '<p>No stature could be calculated. Please enter more measurements.</p>';
+            }
+
+            // Body mass calculations
+            let bodyMassHTML = '<h3>Body Mass Estimates</h3>';
+            let bodyMassResults = {
+                male: [],
+                female: []
+            };
+
+            if (measurements.MLSIHF) {
+                bodyMassResults.male.push({
+                    formula: 'Ruff et al 1991 (Male)',
+                    value: 0.9 * 2.741 * measurements.MLSIHF - 54.9
+                });
+                bodyMassResults.female.push({
+                    formula: 'Ruff et al 1991 (Female)',
+                    value: 0.9 * 2.426 * measurements.MLSIHF - 35.1
+                });
+                
+                // Non-sex specific formulas
+                const commonFormulas = [
+                    {
+                        formula: 'McHenry 1992',
+                        value: 2.239 * measurements.MLSIHF - 39.9
+                    },
+                    {
+                        formula: 'Grine et al 1995',
+                        value: 2.268 * measurements.MLSIHF - 36.5
+                    }
+                ];
+                bodyMassResults.male.push(...commonFormulas);
+                bodyMassResults.female.push(...commonFormulas);
+            }
+
+            // Calculate McHenry 1988 if we have both measurements
+            if (measurements.APsubTF && measurements.MLsubTF) {
+                const femoral_area = measurements.APsubTF * measurements.MLsubTF;
+                const log_bw = 0.624 * Math.log10(femoral_area) - 0.0562;
+                const mcHenryResult = {
+                    formula: 'McHenry 1988',
+                    value: Math.pow(10, log_bw)
+                };
+                bodyMassResults.male.push(mcHenryResult);
+                bodyMassResults.female.push(mcHenryResult);
+            }
+
+            if (bodyMassResults.male.length === 0 && bodyMassResults.female.length === 0) {
+                bodyMassHTML += '<p>No body mass could be calculated. Please enter more measurements.</p>';
+            } else {
+                if (bodyMassResults.male.length > 0) {
+                    bodyMassHTML += '<div class="demographic-section"><h4>Male Estimates</h4>';
+                    bodyMassResults.male.forEach(result => {
+                        bodyMassHTML += `<p>${result.formula}: ${result.value.toFixed(1)} kg</p>`;
+                    });
+                    bodyMassHTML += '</div>';
+                }
+                if (bodyMassResults.female.length > 0) {
+                    bodyMassHTML += '<div class="demographic-section"><h4>Female Estimates</h4>';
+                    bodyMassResults.female.forEach(result => {
+                        bodyMassHTML += `<p>${result.formula}: ${result.value.toFixed(1)} kg</p>`;
+                    });
+                    bodyMassHTML += '</div>';
+                }
+            }
+
+            document.getElementById('stature_results').innerHTML = statureHTML;
+            document.getElementById('body_mass_results').innerHTML = bodyMassHTML;
+        }
+    </script>
+</body>
+</html>
